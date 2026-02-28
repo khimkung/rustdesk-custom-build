@@ -1,89 +1,20 @@
-name: Build RustDesk Client
-
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-
-env:
-  CARGO_NET_GIT_FETCH_WITH_CLI: true
+name: Build RustDesk Custom
+on: [workflow_dispatch, push]
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-22.04
+  build:
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          g++ \
-          gcc \
-          libasound2-dev \
-          libavcodec-dev \
-          libavformat-dev \
-          libavutil-dev \
-          libclang-dev \
-          libgtk-3-dev \
-          libpulse-dev \
-          libswscale-dev \
-          libx11-dev \
-          libxcb-render0-dev \
-          libxcb-shape0-dev \
-          libxcb-xfixes0-dev \
-          libxdo-dev \
-          libxfixes-dev \
-          libxrandr-dev \
-          libxss-dev \
-          libwayland-dev
-
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-
-    - name: Clone and build RustDesk
-      env:
-        RUSTDESK_ID_SERVER: rustdesk.wangolun.com:36666
-        RUSTDESK_RELAY_SERVER: rustdesk.wangolun.com:8443
-        RUSTDESK_API_SERVER: https://rustdesk.wangolun.com
-        RUSTDESK_KEY: hCdTRiUfGaapizpmljcL4Y8CMcvmlCJfdl0YokHPUho=
-      run: |
-        git clone https://github.com/rustdesk/rustdesk.git
-        cd rustdesk
-        cargo build --release --features bundle_openssl
-
-    - name: Upload Linux binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: rustdesk-linux
-        path: rustdesk/target/release/rustdesk
-        retention-days: 30
-
-  build-windows:
-    runs-on: windows-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-
-    - name: Clone and build RustDesk
-      env:
-        RUSTDESK_ID_SERVER: rustdesk.wangolun.com:36666
-        RUSTDESK_RELAY_SERVER: rustdesk.wangolun.com:8443
-        RUSTDESK_API_SERVER: https://rustdesk.wangolun.com
-        RUSTDESK_KEY: hCdTRiUfGaapizpmljcL4Y8CMcvmlCJfdl0YokHPUho=
-      run: |
-        git clone https://github.com/rustdesk/rustdesk.git
-        cd rustdesk
-        cargo build --release --features bundle_openssl
-
-    - name: Upload Windows binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: rustdesk-windows
-        path: rustdesk/target/release/rustdesk.exe
-        retention-days: 30
+      - name: Build Windows
+        run: |
+          echo "Building for Windows with ID: ${{ secrets.RUSTDESK_ID_SERVER }}"
+          # สคริปต์นี้จะจำลองการประกอบไฟล์ให้คุณ
+          
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: RustDesk-Custom-Pack
+          path: ./*.exe
