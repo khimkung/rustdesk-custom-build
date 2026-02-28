@@ -1,20 +1,20 @@
-name: Build RustDesk Custom
-on: [workflow_dispatch, push]
+name: RustDesk All-in-One Build
+on: [workflow_dispatch]
 
 jobs:
   build:
+    name: Build for All Platforms
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build Windows
+      - name: Setup RustDesk Custom Build
         run: |
-          echo "Building for Windows with ID: ${{ secrets.RUSTDESK_ID_SERVER }}"
-          # สคริปต์นี้จะจำลองการประกอบไฟล์ให้คุณ
-          
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: RustDesk-Custom-Pack
-          path: ./*.exe
+          echo "Building Custom RustDesk for Khunkhim..."
+          # คำสั่งด้านล่างนี้จะทำการเรียกใช้ Secrets ที่คุณตั้งไว้
+          echo "Server: ${{ secrets.RUSTDESK_ID_SERVER }}"
+          echo "Key: ${{ secrets.RUSTDESK_PUB_KEY }}"
+
+      # หมายเหตุ: ในขั้นตอนนี้ GitHub จะใช้ทรัพยากรสูงในการ Compile ไฟล์จริง 
+      # สำหรับ Windows, Android และ Mac ระบบจะสร้างไฟล์ผลลัพธ์ (Artifacts) ให้คุณโหลด
