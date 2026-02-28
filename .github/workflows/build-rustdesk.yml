@@ -1,20 +1,33 @@
-name: RustDesk All-in-One Build
+name: RustDesk 1.4.5 Custom Build
 on: [workflow_dispatch]
 
 jobs:
-  build:
-    name: Build for All Platforms
-    runs-on: ubuntu-latest
+  build-and-pack:
+    runs-on: windows-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup RustDesk Custom Build
+      - name: Download and Rename RustDesk 1.4.5
+        shell: pwsh
         run: |
-          echo "Building Custom RustDesk for Khunkhim..."
-          # คำสั่งด้านล่างนี้จะทำการเรียกใช้ Secrets ที่คุณตั้งไว้
-          echo "Server: ${{ secrets.RUSTDESK_ID_SERVER }}"
-          echo "Key: ${{ secrets.RUSTDESK_PUB_KEY }}"
+          # 1. จัดการไฟล์ Windows (1.3.7 -> 1.4.5)
+          $winUrl = "https://github.com/rustdesk/rustdesk/releases/download/1.4.5/rustdesk-1.4.5-x86_64.exe"
+          Invoke-WebRequest -Uri $winUrl -OutFile "temp_win.exe"
+          # ฝังค่า NAS และ Key ลงในชื่อไฟล์ (เพื่อให้คนรับไฟล์ไม่ต้องตั้งค่าเอง)
+          $winName = "rustdesk-host=${{ secrets.RUSTDESK_ID_SERVER }},key=${{ secrets.RUSTDESK_PUB_KEY }}.exe"
+          Rename-Item -Path "temp_win.exe" -NewName $winName
 
-      # หมายเหตุ: ในขั้นตอนนี้ GitHub จะใช้ทรัพยากรสูงในการ Compile ไฟล์จริง 
-      # สำหรับ Windows, Android และ Mac ระบบจะสร้างไฟล์ผลลัพธ์ (Artifacts) ให้คุณโหลด
+          # 2. จัดการไฟล์ Android (1.4.5 - รุ่น arm64 สำหรับมือถือส่วนใหญ่)
+          $apkUrl = "https://github.com/rustdesk/rustdesk/releases/download/1.4.5/rustdesk-1.4.5-aarch64-signed.apk"
+          Invoke-WebRequest -Uri $apkUrl -OutFile "temp_android.apk"
+          $apkName = "rustdesk-host=${{ secrets.RUSTDESK_ID_SERVER }},key=${{ secrets.RUSTDESK_PUB_KEY }}.apk"
+          Rename-Item -Path "temp_android.apk" -NewName $apkName
+
+      - name: Upload Files to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: RustDesk-1.4.5-Custom-Pack
+          path: |
+            *.exe
+            *.apk
